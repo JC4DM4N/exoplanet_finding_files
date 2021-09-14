@@ -1,0 +1,11 @@
+\begin{tabular}{ccccc}
+    \hline \\
+    Parameter & Kepler-102d & Kepler-102e  \\ \\
+    \hline\hline
+    $K$ (ms$^{-1}$) & & \\
+    $a$ (AU) & & \\
+    $i$ (deg) & & \\
+    $M_{\rm P} ($\,M$_{\oplus})$ & & \\
+    $P$ (days) & & \\
+    $T_{\rm c}$ (days) & & \\
+\end{tabular}

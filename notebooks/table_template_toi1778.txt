@@ -1,0 +1,13 @@
+\begin{tabular}{cc}
+    \hline \\ \\
+    Parameter & TOI-1778b  \\ \\
+    \hline\hline \\
+    $K$ (ms$^{-1}$) & \\ \\
+    $a$ (AU) & \\ \\
+    $e$ & \\ \\
+    $i$ (deg) & \\ \\
+    $M_{\rm P} ($\,M$_{\oplus})$ & \\ \\
+    $R_{\rm P} ($\,R$_{\oplus})$ & \\ \\
+    $P$ (days) & \\ \\
+    $T_{\rm c}$ (days) & \\ \\
+\end{tabular}
