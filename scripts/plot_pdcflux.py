@@ -1,3 +1,9 @@
+"""
+Plot raw values of flux vs time from a directory of fits files containing
+    lightcurve data for a given system.
+Useful when scraping a large number of lightcurves from the archive.
+"""
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt
