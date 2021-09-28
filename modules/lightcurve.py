@@ -1,3 +1,8 @@
+"""
+Module for analysing lightcurve data, specifically from TESS, although these functions are probably
+    appropriate for lightcurves obtained by any telescope.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
