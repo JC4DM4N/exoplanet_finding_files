@@ -37,7 +37,7 @@ def remove_trasit_points(time,flux,period=6.51595066707795,duration=2.5334309270
         time, flux : with points removed which are during a transit.
     """
     # convert times to BJD
-    time_BJD += offset
+    time_BJD = time + offset
     # first phase fold the data
     time_pf = phasefold_data(time_BJD,period)
     Tc_pf = phasefold_data(Tc,period)
