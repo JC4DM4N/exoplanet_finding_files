@@ -25,21 +25,32 @@ def phasefold_data(times,period):
     """
     return np.mod(times,period)
 
-def remove_trasit_points(time,flux,period=6.51595066707795,duration=2.53343092705777,offset=-2458870.4338364583):
+def remove_trasit_points(time,flux,period=6.51595066707795,duration=2.53343092705777,offset=2457000,Tc=2458876.00,plot=True):
     """
     Inputs:
         period : period of the transiting planet (days).
         duration : duration of the transit (hours).
-        offset : represents the time since time[0] that the first transit begins, such that transits
-            occur at time[0] + offset + N*period (days).
+        offset : time array offset from BJD=0.
+        Tc : represents the time of transit centre, required to determine where the transit
+            is in the lightcurve.
     Outputs:
         time, flux : with points removed which are during a transit.
     """
+    # convert times to BJD
+    time += offset
     # first phase fold the data
-    time = phasefold_data(time,period)
+    time_pf = phasefold_data(time,period)
+    Tc_pf = phasefold_data(Tc,period)
+    # remove points during the transit
+    duration = duration/24.
+    mask = (time_pf >= Tc_pf - duration/2.) & (time_pf <= Tc_pf + duration/2.)
 
-    #mask = (time >= time[0] + offset + period) & (time <= time[0] + offset + period + duration)
-    import pdb; pdb.set_trace()
+    if plot:
+        plt.figure('original data')
+        plt.scatter(time_pf,flux,s=0.1)
+        plt.figure('transit removed')
+        plt.scatter(time_pf[~mask],flux[~mask],s=0.1)
+        plt.show()
     return
 
 
