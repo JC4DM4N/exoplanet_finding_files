@@ -64,9 +64,18 @@ def remove_trasit_points(time,flux,period=6.51595066707795,duration=2.5334309270
         plt.show()
     return time[~mask], flux[~mask]
 
-
-
-
+def bin_data(time,flux,bin_size=30):
+    """
+    Function to bin data every X minutes
+    Inputs:
+        bin_size : duration of bins in minutes
+    """
+    # convert bin size to days
+    bin_size = bin_size/60./24.
+    time_bins = np.arange(np.min(time), np.max(time), bin_size)
+    ibins = np.digitize(time, time_bins)
+    binned_fluxes = np.asarray([np.mean(flux[ibins==i]) for i in np.arange(ibins.max())])
+    return time_bins, binned_fluxes
 
 def plot_raw_flux(file):
     try:
