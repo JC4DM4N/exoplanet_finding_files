@@ -20,7 +20,15 @@ def read_flux_vs_time(file,flux_label='SAP_FLUX'):
         raise Exception("failed to open fits file")
     header = data[1].header
     data = data[1].data
-    return data['TIME'], data[flux_label]
+    time, flux = remove_nans(data['TIME'], data[flux_label])
+    return time, flux
+
+def remove_nans(time, flux):
+    """
+    remove data points where flux is NaN.
+    """
+    mask = ~np.isnan(flux)
+    return time[mask], flux[mask]
 
 def phasefold_data(times,period):
     """
@@ -55,6 +63,9 @@ def remove_trasit_points(time,flux,period=6.51595066707795,duration=2.5334309270
         plt.scatter(time_pf[~mask],flux[~mask],s=0.1)
         plt.show()
     return time[~mask], flux[~mask]
+
+
+
 
 
 def plot_raw_flux(file):
