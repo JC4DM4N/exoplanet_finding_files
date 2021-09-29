@@ -37,9 +37,9 @@ def remove_trasit_points(time,flux,period=6.51595066707795,duration=2.5334309270
         time, flux : with points removed which are during a transit.
     """
     # convert times to BJD
-    time += offset
+    time_BJD += offset
     # first phase fold the data
-    time_pf = phasefold_data(time,period)
+    time_pf = phasefold_data(time_BJD,period)
     Tc_pf = phasefold_data(Tc,period)
     # remove points during the transit
     duration = duration/24.
@@ -51,7 +51,7 @@ def remove_trasit_points(time,flux,period=6.51595066707795,duration=2.5334309270
         plt.figure('transit removed')
         plt.scatter(time_pf[~mask],flux[~mask],s=0.1)
         plt.show()
-    return
+    return time[~mask], flux[~mask]
 
 
 def plot_raw_flux(file):
