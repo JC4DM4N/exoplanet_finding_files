@@ -7,9 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
 
-def read_flux_vs_time(file):
+def read_flux_vs_time(file,flux_label='SAP_FLUX'):
     """
     Read fits file and return time & flux values
+    Inputs:
+        flux_label : may either be SAP_FLUX or PDCSAP_FLUX, depending whether GP removed
+            or GP included data is wanted.
     """
     try:
         data = fits.open(file)
@@ -17,7 +20,7 @@ def read_flux_vs_time(file):
         raise Exception("failed to open fits file")
     header = data[1].header
     data = data[1].data
-    return data['TIME'], data['PDCSAP_FLUX']
+    return data['TIME'], data[flux_label]
 
 def phasefold_data(times,period):
     """
