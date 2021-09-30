@@ -78,6 +78,11 @@ def bin_data(time,flux,bin_size=30):
     return time_bins, binned_fluxes
 
 def plot_raw_flux(file):
+    """
+    Open fits file and plot PDCSAP_FLUX vs TIME.
+    Inputs:
+        file : path to fits file.
+    """
     try:
         data = fits.open(file)
     except:
