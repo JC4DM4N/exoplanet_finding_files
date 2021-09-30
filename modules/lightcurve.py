@@ -20,15 +20,16 @@ def read_flux_vs_time(file,flux_label='SAP_FLUX'):
         raise Exception("failed to open fits file")
     header = data[1].header
     data = data[1].data
-    time, flux = remove_nans(data['TIME'], data[flux_label])
-    return time, flux
+    import pdb ; pdb.set_trace()
+    time, flux, err = remove_nans(data['TIME'], data[flux_label], data[flux_label+"_ERR"])
+    return time, flux, err
 
-def remove_nans(time, flux):
+def remove_nans(time, flux, flux_err):
     """
     remove data points where flux is NaN.
     """
     mask = ~np.isnan(flux)
-    return time[mask], flux[mask]
+    return time[mask], flux[mask], flux_err[mask]
 
 def phasefold_data(times,period):
     """
@@ -36,7 +37,7 @@ def phasefold_data(times,period):
     """
     return np.mod(times,period)
 
-def remove_trasit_points(time,flux,period=6.51595066707795,duration=2.53343092705777,offset=2457000,Tc=2458876.00,plot=True):
+def remove_trasit_points(time,flux,err,period=6.51595066707795,duration=2.53343092705777,offset=2457000,Tc=2458876.00,plot=True):
     """
     Inputs:
         period : period of the transiting planet (days).
@@ -62,9 +63,9 @@ def remove_trasit_points(time,flux,period=6.51595066707795,duration=2.5334309270
         plt.figure('transit removed')
         plt.scatter(time_pf[~mask],flux[~mask],s=0.1)
         plt.show()
-    return time[~mask], flux[~mask]
+    return time[~mask], flux[~mask], err[~mask]
 
-def bin_data(time,flux,bin_size=30):
+def bin_data(time,flux,err,bin_size=30):
     """
     Function to bin data every X minutes
     Inputs:
@@ -75,7 +76,8 @@ def bin_data(time,flux,bin_size=30):
     time_bins = np.arange(np.min(time), np.max(time), bin_size)
     ibins = np.digitize(time, time_bins)
     binned_fluxes = np.asarray([np.mean(flux[ibins==i]) for i in np.arange(ibins.max())])
-    return time_bins, binned_fluxes
+    binned_flux_err = np.asarray([np.mean(err[ibins==i]) for i in np.arange(ibins.max())])
+    return time_bins, binned_fluxes, binned_flux_err
 
 def plot_raw_flux(file):
     """
