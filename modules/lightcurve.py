@@ -81,7 +81,7 @@ def bin_data(time,flux,err,bin_size=30):
 def convert_to_BJD(time,offset=2457000):
     return time+offset
 
-def plot_raw_flux(file,save=False):
+def plot_raw_flux(file,flux_label='PDCSAP_FLUX',save=False):
     """
     Open fits file and plot PDCSAP_FLUX vs TIME.
     Inputs:
@@ -94,9 +94,9 @@ def plot_raw_flux(file,save=False):
     header = data[1].header
     data = data[1].data
 
-    data = data[~np.isnan(data['PDCSAP_FLUX'])]
+    data = data[~np.isnan(data[flux_label])]
     plt.figure(figsize=(10,5))
-    plt.scatter(data['TIME'], data['PDCSAP_FLUX']/np.mean(data['PDCSAP_FLUX']), s=0.05, c='black')
+    plt.scatter(data['TIME'], data[flux_label]/np.mean(data[flux_label]), s=0.05, c='black')
     plt.xlabel('Time (BJD - 2457000 days)',fontsize=15)
     plt.ylabel('Relative Flux (e-/s)',fontsize=15)
     plt.xticks(fontsize=15)

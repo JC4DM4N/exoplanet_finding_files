@@ -20,15 +20,16 @@ file = args.file
 plot = args.plot
 
 # load data
-t,f,e = lc.read_flux_vs_time(file)
+t,f,e = lc.read_flux_vs_time(file,flux_label='SAP_FLUX')
 # remove data at transit
-t,f,e = lc.remove_trasit_points(t,f,e,plot=False)
+t,f,e = lc.remove_trasit_points(t,f,e,plot=True)
 # bin the remaining data every 30 mins
 tbin,fbin,ebin = lc.bin_data(t,f,e)
 # remove any remaining nans
 tout,fout,eout = lc.remove_nans(tbin,fbin,ebin)
 # convert times to BJD
 tout = lc.convert_to_BJD(tout)
+import pdb ; pdb.set_trace()
 
 if plot:
     plt.scatter(tbin,fbin,s=0.1)
