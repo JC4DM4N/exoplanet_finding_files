@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
 
-def read_flux_vs_time(file,flux_label='SAP_FLUX'):
+def read_flux_vs_time(file,flux_label='PDCSAP_FLUX'):
     """
     Read fits file and return time & flux values
     Inputs:
@@ -30,7 +30,7 @@ def remove_nans(time, flux, flux_err):
     mask = ~np.isnan(flux)
     return time[mask], flux[mask], flux_err[mask]
 
-def phasefold_data(times,period):
+def phasefold_data(times,period=6.51595066707795):
     """
     Fold the time values on the planet transit period.
     """
@@ -81,7 +81,7 @@ def bin_data(time,flux,err,bin_size=30):
 def convert_to_BJD(time,offset=2457000):
     return time+offset
 
-def plot_raw_flux(file):
+def plot_raw_flux(file,save=False):
     """
     Open fits file and plot PDCSAP_FLUX vs TIME.
     Inputs:
@@ -95,7 +95,10 @@ def plot_raw_flux(file):
     data = data[1].data
 
     data = data[~np.isnan(data['PDCSAP_FLUX'])]
-    plt.scatter(data['TIME'], data['PDCSAP_FLUX']/np.mean(data['PDCSAP_FLUX']), s=0.05)
-    plt.xlabel('Time (days)')
-    plt.ylabel('Flux (e-/s)')
+    plt.figure(figsize=(10,5))
+    plt.scatter(data['TIME'], data['PDCSAP_FLUX']/np.mean(data['PDCSAP_FLUX']), s=0.05, c='black')
+    plt.xlabel('Time (BJD - 2457000 days)')
+    plt.ylabel('Relative Flux (e-/s)')
+    if save:
+        plt.savefig('TESS_LC_flux_vs_time.png')
     plt.show()
