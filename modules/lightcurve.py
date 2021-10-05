@@ -97,8 +97,36 @@ def plot_raw_flux(file,save=False):
     data = data[~np.isnan(data['PDCSAP_FLUX'])]
     plt.figure(figsize=(10,5))
     plt.scatter(data['TIME'], data['PDCSAP_FLUX']/np.mean(data['PDCSAP_FLUX']), s=0.05, c='black')
-    plt.xlabel('Time (BJD - 2457000 days)')
-    plt.ylabel('Relative Flux (e-/s)')
+    plt.xlabel('Time (BJD - 2457000 days)',fontsize=15)
+    plt.ylabel('Relative Flux (e-/s)',fontsize=15)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
     if save:
-        plt.savefig('TESS_LC_flux_vs_time.png')
+        plt.savefig('TESS_LC_flux_vs_time.pdf')
+    plt.show()
+
+def plot_phase_folded_flux(file,period=6.51595066707795,save=False):
+    """
+    Open fits file and plot PDCSAP_FLUX vs TIME.
+    Inputs:
+        file : path to fits file.
+    """
+    try:
+        data = fits.open(file)
+    except:
+        raise Exception("failed to open fits file")
+    header = data[1].header
+    data = data[1].data
+
+    data = data[~np.isnan(data['PDCSAP_FLUX'])]
+    times = phasefold_data(data['TIME'],period)
+    plt.figure(figsize=(10,5))
+    plt.scatter(times, data['PDCSAP_FLUX']/np.mean(data['PDCSAP_FLUX']), s=0.05, c='black')
+    plt.xlabel('Time (BJD - 2457000 days)',fontsize=15)
+    plt.ylabel('Relative Flux (e-/s)',fontsize=15)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
+    plt.xlim([0,period])
+    if save:
+        plt.savefig('TESS_LC_pf_flux_vs_time.pdf')
     plt.show()
