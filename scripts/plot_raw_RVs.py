@@ -17,8 +17,11 @@ rv = data[:,1]
 rv_error = data[:,2]
 
 #plot the RVs vs time
-plt.errorbar(time,rv,yerr=rv_error,fmt='o',c='black')
-plt.ylabel(r'RV (ms$^{-1}$)')
-plt.xlabel('BJD - 2450000 (DAYS)')
+plt.errorbar(time,rv,yerr=rv_error,fmt='.',c='black',linewidth=1)
+plt.ylabel(r'RV (ms$^{-1}$)',fontsize=15)
+plt.xlabel('BJD - 2450000 (Days)',fontsize=15)
+plt.yticks(fontsize=12)
+plt.xticks(fontsize=12)
+plt.tight_layout()
 plt.savefig('raw_RV_plot.png')
 plt.show()
