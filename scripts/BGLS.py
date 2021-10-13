@@ -38,33 +38,39 @@
 # Import necessary packages
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--file','-file')
+parser.add_argument('--file','-file',help='path to rdb file')
+parser.add_argument('--ydata','-ydata',help='column header for the y data (vrad/fwhm)')
 args = parser.parse_args()
 fn = args.file
+ydata = args.ydata
+
+# want to ensure this is the rdb file, which contains fwhm columns
+assert fn.endswith('.rdb')
+# rdb file has rows [header, placeholder, data], so we want to drop the placeholder row
+data = pd.read_csv(fn,delimiter='\t')
+data = data.drop(index=0)
 
 # Predefine pi
 pi = np.pi
 
-y = []
-t = []
-err = []
-
-data = np.genfromtxt(fn,skip_header=2)
-
-t = data[:,0]
-y = data[:,1]
-err = data[:,2]
+t = np.asarray(data['rjd']).astype(float)
+y = np.asarray(data[ydata]).astype(float)
+if ydata=='vrad':
+    err = np.asarray(data['svrad']).astype(float)
+elif ydata=='fwhm':
+    err = np.asarray(data['sig_fwhm']).astype(float)
+else:
+    raise Exception('Unfamiliar ydata header used. Bailing out.')
 
 print(t, y, err)
 
-def bgls(t, y, err, plow=1.0, phigh=100.0, ofac=10, jit=0.0,
-         dt = None):
-
-    '''
+def bgls(t, y, err, plow=1.0, phigh=100.0, ofac=10, jit=0.0, dt = None):
+    """
     BGLS: Calculates Bayesian General Lomb-Scargle
                       periodogram, normalised with minimum.
 
@@ -76,8 +82,7 @@ def bgls(t, y, err, plow=1.0, phigh=100.0, ofac=10, jit=0.0,
     ofac: oversampling factor
     jit: white noise to be added to the error bars
     dt: time span to be considered
-    '''
-
+    """
     # Define time span
     if dt == None:
         dt = np.max(t)-np.min(t)
@@ -103,8 +108,7 @@ def bgls(t, y, err, plow=1.0, phigh=100.0, ofac=10, jit=0.0,
     exponents = []
 
     for i, omega in enumerate(omegas):
-        theta = 0.5 * np.arctan2(sum(w*np.sin(2.*omega*t)),
-                                 sum(w*np.cos(2.*omega*t)))
+        theta = 0.5 * np.arctan2(sum(w*np.sin(2.*omega*t)), sum(w*np.cos(2.*omega*t)))
         x = omega*t - theta
         cosx = np.cos(x)
         sinx = np.sin(x)
@@ -120,70 +124,43 @@ def bgls(t, y, err, plow=1.0, phigh=100.0, ofac=10, jit=0.0,
         SSh = sum(wsinx*sinx)
 
         if (CCh != 0 and SSh != 0):
-            K = ((C*C*SSh + S*S*CCh - W*CCh*SSh)/
-                 (2.*CCh*SSh))
-
-            L = ((bigY*CCh*SSh - C*YCh*SSh - S*YSh*CCh)/
-                 (CCh*SSh))
-
-            M = ((YCh*YCh*SSh + YSh*YSh*CCh)/
-                 (2.*CCh*SSh))
-
+            K = ((C*C*SSh + S*S*CCh - W*CCh*SSh)/(2.*CCh*SSh))
+            L = ((bigY*CCh*SSh - C*YCh*SSh - S*YSh*CCh)/(CCh*SSh))
+            M = ((YCh*YCh*SSh + YSh*YSh*CCh)/(2.*CCh*SSh))
             constants.append(1./np.sqrt(CCh*SSh*abs(K)))
-
         elif (CCh == 0):
             K = (S*S - W*SSh)/(2.*SSh)
-
             L = (bigY*SSh - S*YSh)/(SSh)
-
             M = (YSh*YSh)/(2.*SSh)
-
             constants.append(1./np.sqrt(SSh*abs(K)))
-
         elif (SSh == 0):
             K = (C*C - W*CCh)/(2.*CCh)
-
             L = (bigY*CCh - C*YCh)/(CCh)
-
             M = (YCh*YCh)/(2.*CCh)
-
             constants.append(1./np.sqrt(CCh*abs(K)))
-
         if K > 0:
-            raise RuntimeError('K is positive.\
-                                This should not happen.')
+            raise RuntimeError('K is positive. This should not happen.')
 
         exponents.append(M - L*L/(4.*K))
 
     constants = np.array(constants)
     exponents = np.array(exponents)
 
-    logp = (np.log10(constants) +
-                        (exponents * np.log10(np.exp(1.))))
-
+    logp = (np.log10(constants) + (exponents * np.log10(np.exp(1.))))
     # Normalise
     logp = logp - min(logp)
-
     # Return array of frequencies and log of probability
     return f, logp
 
 f, logp = bgls(t,y,err)
-
 print(f, logp)
 
 plt.figure(figsize=(15,5))
 plt.semilogx(1.0/f,logp,label='HARPSN : TOI-1778', linewidth=1.0)
-#plt.plot(f,logp,label='Kepler-103')
-#plt.xlim(1.0,500.0)
 plt.xlim(1.0,100.0)
-#plt.plot([12.88,12.88],[0.0,400.0],color='black',ls='solid')
 plt.plot([6.526,6.526],[0.0,100.0],color='black',ls='dashed',lw=0.75)
 plt.xlabel('Period (days)')
 plt.ylabel('log$_{10}$ (Power)')
-#plt.title('HARPS-N: $S_{HK}$')
-#plt.title('HARPS-N: RVs')
-#plt.title('HARPS-N: FWHM')
-#plt.title('HARPS-N: BIS')
 plt.legend(loc='upper center')
 plt.ylim(0.0,100.0)
 plt.savefig('TOI-1778_BGLS.png',dpi=1000)
