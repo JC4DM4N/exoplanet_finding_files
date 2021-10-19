@@ -127,10 +127,10 @@ def plot_binned_flux(file,flux_label='PDCSAP_FLUX',save=False):
     plt.yticks(fontsize=15)
     plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
     if save:
-        plt.savefig('TESS_LC_flux_vs_time.pdf')
+        plt.savefig('TESS_LC_flux_vs_time_%s.pdf' %flux_label)
     plt.show()
 
-def plot_phase_folded_flux(file,period=6.51595066707795,save=False):
+def plot_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.00,duration=2.53343092705777,save=False):
     """
     Open fits file and plot PDCSAP_FLUX vs TIME.
     Inputs:
@@ -142,14 +142,24 @@ def plot_phase_folded_flux(file,period=6.51595066707795,save=False):
     tbin, fbin, ebin = bin_data(t,f,e)
     # phasefold data
     times_pf = phasefold_data(tbin,period)
+
+    # now zoom in on region of the transit centre
+    # get relative position of tranist centre, and plot a few hours either side of this
+    RTc = np.mod(Tc-2457000,period)
+    mask = (times_pf > RTc - 10./24.) & (times_pf < RTc + 10./24.)
+    times_pf = times_pf[mask] - RTc
+    fbin = fbin[mask]
+    # convert times from days to hours
+    times_pf = times_pf*24
+
     plt.figure(figsize=(10,5))
-    plt.scatter(times_pf, fbin/np.mean(fbin), s=5, c='black')
-    plt.xlabel('Time (BJD - 2457000 days)',fontsize=15)
+    plt.scatter(times_pf, fbin/np.mean(fbin), s=20, c='black')
+    plt.xlabel('Hours since transit centre',fontsize=15)
     plt.ylabel('Relative Flux (e-/s)',fontsize=15)
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
     plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
-    plt.xlim([0,period])
+    #plt.xlim([0,period])
     if save:
         plt.savefig('TESS_LC_pf_flux_vs_time.pdf')
     plt.show()
