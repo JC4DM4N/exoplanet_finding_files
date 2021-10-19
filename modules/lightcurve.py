@@ -76,10 +76,18 @@ def bin_data(time,flux,err,bin_size=30):
     ibins = np.digitize(time, time_bins)
     binned_fluxes = np.asarray([np.mean(flux[ibins==i]) for i in np.arange(ibins.max())])
     binned_flux_err = np.asarray([np.mean(err[ibins==i]) for i in np.arange(ibins.max())])
-    return time_bins, binned_fluxes, binned_flux_err
+    # remove nans, which correpsond to empty  bins
+    return remove_nans(time_bins, binned_fluxes, binned_flux_err)
 
 def convert_to_BJD(time,offset=2457000):
     return time+offset
+
+def subtract_mean_flux(flux):
+    """
+    Return mean subtracted fluxes from raw fluxes.
+    """
+    flux -= np.median(flux)
+    return flux
 
 def plot_raw_flux(file,flux_label='PDCSAP_FLUX',save=False):
     """
@@ -97,6 +105,33 @@ def plot_raw_flux(file,flux_label='PDCSAP_FLUX',save=False):
     data = data[~np.isnan(data[flux_label])]
     plt.figure(figsize=(10,5))
     plt.scatter(data['TIME'], data[flux_label]/np.mean(data[flux_label]), s=0.05, c='black')
+    plt.xlabel('Time (BJD - 2457000 days)',fontsize=15)
+    plt.ylabel('Relative Flux (e-/s)',fontsize=15)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
+    if save:
+        plt.savefig('TESS_LC_flux_vs_time.pdf')
+    plt.show()
+
+def plot_binned_flux(file,flux_label='PDCSAP_FLUX',save=False):
+    """
+    Open fits file and plot PDCSAP_FLUX vs TIME.
+    Inputs:
+        file : path to fits file.
+    """
+    try:
+        data = fits.open(file)
+    except:
+        raise Exception("failed to open fits file")
+    header = data[1].header
+    data = data[1].data
+    data = data[~np.isnan(data[flux_label])]
+    # remove nans
+    t, f, e = remove_nans(data['TIME'],data[flux_label],data[flux_label+"_ERR"])
+    # bin data
+    tbin, fbin, ebin = bin_data(t,f,e)
+    plt.figure(figsize=(10,5))
+    plt.scatter(tbin, fbin/np.mean(fbin), s=1, c='black')
     plt.xlabel('Time (BJD - 2457000 days)',fontsize=15)
     plt.ylabel('Relative Flux (e-/s)',fontsize=15)
     plt.xticks(fontsize=15)
