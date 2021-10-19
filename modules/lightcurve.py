@@ -5,6 +5,7 @@ Module for analysing lightcurve data, specifically from TESS, although these fun
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import StrMethodFormatter
 from astropy.io import fits
 
 def read_flux_vs_time(file,flux_label='PDCSAP_FLUX'):
@@ -95,20 +96,15 @@ def plot_raw_flux(file,flux_label='PDCSAP_FLUX',save=False):
     Inputs:
         file : path to fits file.
     """
-    try:
-        data = fits.open(file)
-    except:
-        raise Exception("failed to open fits file")
-    header = data[1].header
-    data = data[1].data
-
-    data = data[~np.isnan(data[flux_label])]
+    # read data
+    t, f, e = read_flux_vs_time(file,flux_label)
     plt.figure(figsize=(10,5))
-    plt.scatter(data['TIME'], data[flux_label]/np.mean(data[flux_label]), s=0.05, c='black')
+    plt.scatter(t, f/np.mean(f), s=1, c='black')
     plt.xlabel('Time (BJD - 2457000 days)',fontsize=15)
     plt.ylabel('Relative Flux (e-/s)',fontsize=15)
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
+    plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
     if save:
         plt.savefig('TESS_LC_flux_vs_time.pdf')
     plt.show()
@@ -119,23 +115,17 @@ def plot_binned_flux(file,flux_label='PDCSAP_FLUX',save=False):
     Inputs:
         file : path to fits file.
     """
-    try:
-        data = fits.open(file)
-    except:
-        raise Exception("failed to open fits file")
-    header = data[1].header
-    data = data[1].data
-    data = data[~np.isnan(data[flux_label])]
-    # remove nans
-    t, f, e = remove_nans(data['TIME'],data[flux_label],data[flux_label+"_ERR"])
+    # read data
+    t, f, e = read_flux_vs_time(file,flux_label)
     # bin data
     tbin, fbin, ebin = bin_data(t,f,e)
     plt.figure(figsize=(10,5))
-    plt.scatter(tbin, fbin/np.mean(fbin), s=1, c='black')
+    plt.scatter(tbin, fbin/np.mean(fbin), s=5, c='black')
     plt.xlabel('Time (BJD - 2457000 days)',fontsize=15)
     plt.ylabel('Relative Flux (e-/s)',fontsize=15)
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
+    plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
     if save:
         plt.savefig('TESS_LC_flux_vs_time.pdf')
     plt.show()
@@ -146,21 +136,19 @@ def plot_phase_folded_flux(file,period=6.51595066707795,save=False):
     Inputs:
         file : path to fits file.
     """
-    try:
-        data = fits.open(file)
-    except:
-        raise Exception("failed to open fits file")
-    header = data[1].header
-    data = data[1].data
-
-    data = data[~np.isnan(data['PDCSAP_FLUX'])]
-    times = phasefold_data(data['TIME'],period)
+    # read data
+    t, f, e = read_flux_vs_time(file,'PDCSAP_FLUX')
+    # bin data
+    tbin, fbin, ebin = bin_data(t,f,e)
+    # phasefold data
+    times_pf = phasefold_data(tbin,period)
     plt.figure(figsize=(10,5))
-    plt.scatter(times, data['PDCSAP_FLUX']/np.mean(data['PDCSAP_FLUX']), s=0.05, c='black')
+    plt.scatter(times_pf, fbin/np.mean(fbin), s=5, c='black')
     plt.xlabel('Time (BJD - 2457000 days)',fontsize=15)
     plt.ylabel('Relative Flux (e-/s)',fontsize=15)
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
+    plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
     plt.xlim([0,period])
     if save:
         plt.savefig('TESS_LC_pf_flux_vs_time.pdf')
