@@ -9,7 +9,7 @@ import os
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
-sys.path.insert(0,os.path.join(os.path.dirname(os.path.realpath(__file__)),'../modules'))
+sys.path.insert(0,os.path.join(os.path.dirname(os.path.realpath(__file__)),'../../modules'))
 import lightcurve as lc
 
 parser = argparse.ArgumentParser()
@@ -20,7 +20,7 @@ file = args.file
 plot = args.plot
 
 # load data
-t,f,e = lc.read_flux_vs_time(file,flux_label='SAP_FLUX')
+t,f,e = lc.read_flux_vs_time(file,flux_label='PDCSAP_FLUX')
 # remove data at transit
 t,f,e = lc.remove_trasit_points(t,f,e,plot=True)
 # bin the remaining data every 30 mins
@@ -29,7 +29,6 @@ tbin,fbin,ebin = lc.bin_data(t,f,e)
 tout,fout,eout = lc.remove_nans(tbin,fbin,ebin)
 # convert times to BJD
 tout = lc.convert_to_BJD(tout)
-import pdb ; pdb.set_trace()
 
 if plot:
     plt.scatter(tbin,fbin,s=0.1)
