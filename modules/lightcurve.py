@@ -75,10 +75,25 @@ def bin_data(time,flux,err,bin_size=30):
     bin_size = bin_size/60./24.
     time_bins = np.arange(np.min(time), np.max(time), bin_size)
     ibins = np.digitize(time, time_bins)
-    binned_fluxes = np.asarray([np.mean(flux[ibins==i]) for i in np.arange(ibins.max())])
-    binned_flux_err = np.asarray([np.mean(err[ibins==i]) for i in np.arange(ibins.max())])
+    binned_fluxes = []
+    binned_flux_errs = []
+    for bin in np.unique(ibins):
+        mask = ibins==bin
+        binned_flux = np.mean(flux[mask])
+        binned_fluxes.append(binned_flux)
+        binned_flux_err = binned_flux*np.sqrt(np.sum(np.square(err[mask]/flux[mask])))
+        binned_flux_err = binned_flux_err/np.sum(mask)
+        binned_flux_errs.append(binned_flux_err)
+    time_bins = time_bins[np.unique(ibins)-1]
+    binned_fluxes = np.asarray(binned_fluxes)
+    binned_flux_errs = np.asarray(binned_flux_errs)
+
+    #binned_fluxes = np.asarray([np.mean(flux[ibins==i]) for i in np.arange(ibins.max())])
+    #binned_flux_err = np.asarray([np.mean(err[ibins==i]) for i in np.arange(ibins.max())])
+    #binned_flux_err = binned_fluxes*np.sqrt(np.sum(np.square(data[mask,11]/data[mask,10])))
+
     # remove nans, which correpsond to empty  bins
-    return remove_nans(time_bins, binned_fluxes, binned_flux_err)
+    return remove_nans(time_bins, binned_fluxes, binned_flux_errs)
 
 def convert_to_BJD(time,offset=2457000):
     return time+offset
@@ -138,22 +153,23 @@ def plot_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.00,duration=2
     """
     # read data
     t, f, e = read_flux_vs_time(file,'PDCSAP_FLUX')
-    # bin data
-    tbin, fbin, ebin = bin_data(t,f,e)
     # phasefold data
-    times_pf = phasefold_data(tbin,period)
+    times_pf = phasefold_data(t,period)
+    # bin data
+    tbin, fbin, ebin = bin_data(times_pf,f,e)
 
     # now zoom in on region of the transit centre
     # get relative position of tranist centre, and plot a few hours either side of this
     RTc = np.mod(Tc-2457000,period)
-    mask = (times_pf > RTc - 10./24.) & (times_pf < RTc + 10./24.)
-    times_pf = times_pf[mask] - RTc
+    mask = (tbin > RTc - 10./24.) & (tbin < RTc + 10./24.)
+    tbin = tbin[mask] - RTc
     fbin = fbin[mask]
+    ebin = ebin[mask]
     # convert times from days to hours
-    times_pf = times_pf*24
+    tbin = tbin*24
 
     plt.figure(figsize=(10,5))
-    plt.scatter(times_pf, fbin/np.mean(fbin), s=20, c='black')
+    plt.errorbar(tbin, fbin/np.mean(fbin), yerr=ebin/np.mean(fbin), fmt='.', c='black')
     plt.xlabel('Hours since transit centre',fontsize=15)
     plt.ylabel('Relative Flux (e-/s)',fontsize=15)
     plt.xticks(fontsize=15)
