@@ -38,6 +38,8 @@ for bin in np.unique(ibins):
     residuals_binned.append(residuals)
     residuals_err_binned.append(residuals_err)
 
+plt.figure(figsize=(6,5))
+
 gs = gridspec.GridSpec(2,1,height_ratios=[3,1])
 plt.subplot(gs[0])
 # scatter plot the raw flux values
@@ -57,6 +59,8 @@ plt.errorbar(phase_binned,residuals_binned,yerr=residuals_err_binned,fmt='.',col
 plt.xlabel('Phase')
 plt.ylabel('Residuals')
 plt.xlim(0.164,0.27)
+
+plt.tight_layout()
 
 plt.savefig('LC_transit_TOI1778.png')
 plt.show()

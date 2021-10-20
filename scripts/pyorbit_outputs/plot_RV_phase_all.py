@@ -58,11 +58,9 @@ for i in range(ndata):
         plt.legend(loc='upper right',fontsize=8)
 
         plt.ylabel('RV [ms$^{-1}$]')
-        plt.title(plabels[j])
-        #plt.text(-0.45, 25.0, '$K_b$ = 5.90 $\pm$ 1.13 m s$^{-1}$', fontsize = 10)
-        #plt.text(-0.45, 20.00, '$M_b$ = 58.1 $\pm$ 11.5 M$_\oplus$', fontsize = 10)
-        #plt.text(-0.45, 10.0, '$e_b$ = 0 (assumed)', fontsize = 8)
-        #plt.text(1.4,-13.5,'(a)',fontsize=10)
+        plt.text(-0.45, 12.5, r'$K_b = 3.77_{-0.76}^{+0.62}$ ms$^{-1}$', fontsize = 12)
+        plt.text(-0.45, 9.0, r'$M_b = 11.79_{-2.37}^{+2.00}$ M$_\oplus$', fontsize = 12)
+        #plt.text(-0.45, 8.0, '$e_b = 0.25_{-0.10}^{+0.08}$', fontsize = 10)
 
         plt.subplot(gs[1])
         plt.scatter(data[:,2],data[:,10],s=15,marker='o',color='black')
@@ -83,6 +81,8 @@ for i in range(ndata):
 
         plt.xlabel('Phase')
         plt.ylabel('O-C [ms$^{-1}$]')
+
+        plt.tight_layout()
 
         plt.savefig('RV_phase_%s_%s.png' %(plabels[j], dlabels[i]))
 plt.show()
