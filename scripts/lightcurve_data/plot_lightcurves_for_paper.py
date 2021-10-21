@@ -13,7 +13,6 @@ import lightcurve as lc
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-file') # path to raw fits file
-parser.add_argument('-plot',action='store_true') # boolean, where to plot results
 args = parser.parse_args()
 file = args.file
 
