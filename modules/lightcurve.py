@@ -88,10 +88,6 @@ def bin_data(time,flux,err,bin_size=30):
     binned_fluxes = np.asarray(binned_fluxes)
     binned_flux_errs = np.asarray(binned_flux_errs)
 
-    #binned_fluxes = np.asarray([np.mean(flux[ibins==i]) for i in np.arange(ibins.max())])
-    #binned_flux_err = np.asarray([np.mean(err[ibins==i]) for i in np.arange(ibins.max())])
-    #binned_flux_err = binned_fluxes*np.sqrt(np.sum(np.square(data[mask,11]/data[mask,10])))
-
     # remove nans, which correpsond to empty  bins
     return remove_nans(time_bins, binned_fluxes, binned_flux_errs)
 
@@ -120,7 +116,9 @@ def plot_raw_flux(file,flux_label='PDCSAP_FLUX',save=False):
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
     plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
+    plt.xlim([min(t),max(t)])
     if save:
+        plt.tight_layout()
         plt.savefig('TESS_LC_flux_vs_time.pdf')
     plt.show()
 
@@ -141,11 +139,13 @@ def plot_binned_flux(file,flux_label='PDCSAP_FLUX',save=False):
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
     plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
+    plt.xlim([min(tbin),max(tbin)])
     if save:
+        plt.tight_layout()
         plt.savefig('TESS_LC_flux_vs_time_%s.pdf' %flux_label)
     plt.show()
 
-def plot_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.00,duration=2.53343092705777,save=False):
+def plot_binned_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.025023,duration=2.53343092705777+0.6371884,save=False):
     """
     Open fits file and plot PDCSAP_FLUX vs TIME.
     Inputs:
@@ -161,6 +161,7 @@ def plot_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.00,duration=2
     # now zoom in on region of the transit centre
     # get relative position of tranist centre, and plot a few hours either side of this
     RTc = np.mod(Tc-2457000,period)
+    transit = (tbin > RTc - duration/2./24.) & (tbin < RTc + duration/2./24)
     xmin, xmax = (RTc - period/10./2., RTc + period/10./2.) # plot 1/10 of a phase
     # convert times from days to phase
     tbin = tbin/period
@@ -170,7 +171,22 @@ def plot_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.00,duration=2
 
     plt.figure(figsize=(10,5))
     plt.errorbar(times_pf,f/np.mean(f),yerr=e/np.mean(f),fmt='.',c='grey',zorder=0)
-    plt.errorbar(tbin,fbin/np.mean(fbin),yerr=ebin/np.mean(fbin),fmt='.',c='black',zorder=1)
+    plt.errorbar(tbin[~transit],fbin[~transit]/np.mean(fbin),yerr=ebin[~transit]/np.mean(fbin),fmt='.',c='black',zorder=1)
+    plt.errorbar(tbin[transit],fbin[transit]/np.mean(fbin),yerr=ebin[transit]/np.mean(fbin),fmt='.',c='red',zorder=2)
+    plt.xlabel('Phase',fontsize=15)
+    plt.ylabel('Relative Flux (e-/s)',fontsize=15)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
+    plt.xlim([0,1])
+    plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
+    if save:
+        plt.tight_layout()
+        plt.savefig('TESS_LC_pf_flux_vs_time.pdf')
+
+    plt.figure(figsize=(10,5))
+    plt.errorbar(times_pf,f/np.mean(f),yerr=e/np.mean(f),fmt='.',c='grey',zorder=0)
+    plt.errorbar(tbin[~transit],fbin[~transit]/np.mean(fbin),yerr=ebin[~transit]/np.mean(fbin),fmt='.',c='black',zorder=1)
+    plt.errorbar(tbin[transit],fbin[transit]/np.mean(fbin),yerr=ebin[transit]/np.mean(fbin),fmt='.',c='red',zorder=1)
     plt.xlabel('Phase',fontsize=15)
     plt.ylabel('Relative Flux (e-/s)',fontsize=15)
     plt.xticks(fontsize=15)
@@ -179,5 +195,5 @@ def plot_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.00,duration=2
     plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
     if save:
         plt.tight_layout()
-        plt.savefig('TESS_LC_pf_flux_vs_time.pdf')
+        plt.savefig('TESS_LC_pf_zoomed_flux_vs_time.pdf')
     plt.show()
