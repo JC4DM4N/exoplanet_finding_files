@@ -161,12 +161,12 @@ def plot_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.00,duration=2
     # now zoom in on region of the transit centre
     # get relative position of tranist centre, and plot a few hours either side of this
     RTc = np.mod(Tc-2457000,period)
-    mask = (tbin > RTc - 10./24.) & (tbin < RTc + 10./24.)
-    tbin = tbin[mask] - RTc
+    mask = (tbin > RTc - period/10./2.) & (tbin < RTc + period/10./2.) # plot 1/10 of a phase
+    tbin = tbin[mask]
     fbin = fbin[mask]
     ebin = ebin[mask]
-    # convert times from days to hours
-    tbin = tbin*24
+    # convert times from days to phase
+    tbin = tbin/period
 
     plt.figure(figsize=(10,5))
     plt.errorbar(tbin, fbin/np.mean(fbin), yerr=ebin/np.mean(fbin), fmt='.', c='black')
@@ -175,6 +175,7 @@ def plot_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.00,duration=2
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
     plt.gca().yaxis.set_major_formatter(StrMethodFormatter('{x:,.4f}'))
+    plt.ylim([0.999,1.001])
     #plt.xlim([0,period])
     if save:
         plt.savefig('TESS_LC_pf_flux_vs_time.pdf')
