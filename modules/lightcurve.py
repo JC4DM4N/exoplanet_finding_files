@@ -170,7 +170,7 @@ def plot_phase_folded_flux(file,period=6.51595066707795,Tc=2458876.00,duration=2
 
     plt.figure(figsize=(10,5))
     plt.errorbar(tbin, fbin/np.mean(fbin), yerr=ebin/np.mean(fbin), fmt='.', c='black')
-    plt.xlabel('Hours since transit centre',fontsize=15)
+    plt.xlabel('Phase',fontsize=15)
     plt.ylabel('Relative Flux (e-/s)',fontsize=15)
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
