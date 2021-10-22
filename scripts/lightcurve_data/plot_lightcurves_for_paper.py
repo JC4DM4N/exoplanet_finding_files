@@ -18,4 +18,4 @@ file = args.file
 
 for label in ['PDCSAP_FLUX','SAP_FLUX']:
     lc.plot_binned_flux(file,flux_label=label,save=True)
-lc.plot_phase_folded_flux(file,save=True)
+lc.plot_binned_phase_folded_flux(file,save=True)
