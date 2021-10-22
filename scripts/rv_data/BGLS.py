@@ -44,7 +44,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--file','-file',help='path to rdb file')
-parser.add_argument('--ydata','-ydata',help='column header for the y data (vrad/fwhm)')
+parser.add_argument('--ydata','-ydata',help='column header for the y data (vrad/fwhm/bis_span)')
 args = parser.parse_args()
 fn = args.file
 ydata = args.ydata
@@ -64,6 +64,8 @@ if ydata=='vrad':
     err = np.asarray(data['svrad']).astype(float)
 elif ydata=='fwhm':
     err = np.asarray(data['sig_fwhm']).astype(float)
+elif ydata=='bis_span':
+    err = np.asarray(data['sig_bis_span']).astype(float)
 else:
     raise Exception('Unfamiliar ydata header used. Bailing out.')
 
@@ -155,16 +157,16 @@ def bgls(t, y, err, plow=1.0, phigh=100.0, ofac=10, jit=0.0, dt = None):
 f, logp = bgls(t,y,err)
 print(f, logp)
 
-plt.figure(figsize=(15,5))
+#plt.figure(figsize=(15,5))
 plt.semilogx(1.0/f,logp,label='HARPSN : TOI-1778', linewidth=1.0)
 plt.xlim(1.0,100.0)
 plt.plot([6.526,6.526],[0.0,100.0],color='black',ls='dashed',lw=0.75)
 plt.xlabel('Period (days)')
 plt.ylabel('log$_{10}$ (Power)')
 plt.legend(loc='upper center')
-plt.ylim(0.0,100.0)
-plt.savefig('TOI-1778_BGLS.png',dpi=1000)
-plt.show()
+plt.ylim(0.0,1.2*np.max(logp))
+plt.savefig('TOI-1778_BGLS_%s.png' %ydata,dpi=1000)
+#plt.show()
 
 def sbgls(t, y, err, obsstart = 5, plow=0.5, phigh=100,
           ofac=1, jit=0.0, fig='yes'):
