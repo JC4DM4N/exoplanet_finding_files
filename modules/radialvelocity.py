@@ -27,7 +27,7 @@ def bgls(t, y, err, plow=1.0, phigh=100.0, ofac=10, jit=0.0, dt = None):
     amount = (phigh-plow)*dt*ofac/plow/phigh + 1
     # Define frequencies
     f = np.linspace(1./phigh, 1./plow, int(amount))
-    omegas = 2. * pi * f
+    omegas = 2.*np.pi*f
     # Define weights - optional white noise can be added
     err2 = err * err + jit * jit
     w = 1./err2
