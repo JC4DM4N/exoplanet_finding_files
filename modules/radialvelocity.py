@@ -77,3 +77,15 @@ def bgls(t, y, err, plow=1.0, phigh=100.0, ofac=10, jit=0.0, dt = None):
     logp = logp - min(logp)
     # Return array of frequencies and log of probability
     return f, logp
+
+def load_rvs(file):
+    """
+    Load RVs from a datafile with columns [TIME, RV, RV_ERR]
+    This is the same file format as is used as inputs for the PyORBIT analysis.
+    """
+    # load the data file with the RVs and their errors
+    data = np.genfromtxt(file)
+    time = data[:,0]
+    rv = data[:,1]
+    rv_error = data[:,2]
+    return time, rv, rv_error
