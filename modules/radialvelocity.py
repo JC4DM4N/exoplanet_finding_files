@@ -89,3 +89,21 @@ def load_rvs(file):
     rv = data[:,1]
     rv_error = data[:,2]
     return time, rv, rv_error
+
+def plot_raw_rvs(file, show=False, save=False):
+    """
+    Load RVs from a data file, and plot time vs. RV with associated error bars.
+    """
+    time, rv, rv_err = load_rvs(file)
+
+    #plot the RVs vs time
+    plt.errorbar(time,rv,yerr=rv_error,fmt='.',c='black',linewidth=1)
+    plt.ylabel(r'RV (ms$^{-1}$)',fontsize=15)
+    plt.xlabel('BJD - 2450000 (Days)',fontsize=15)
+    plt.yticks(fontsize=12)
+    plt.xticks(fontsize=12)
+    plt.tight_layout()
+    if save:
+        plt.savefig('raw_RV_plot.png')
+    if show:
+        plt.show()
