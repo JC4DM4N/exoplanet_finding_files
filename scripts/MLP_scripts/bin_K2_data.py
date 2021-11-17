@@ -39,8 +39,6 @@ for i in range(0,nbins):
 
     print(time_binned, data_binned, stdev_binned, 2, 2, -1)
 
-#  print stdev, np.std(data[i*5:i*5+5,1]),np.mean(data[i*5:i*5+5,1])
-
   data_stdev = np.std(data[i*5:i*5+5,1])
 
   data_binarray.append([time_binned,data_binned,data_stdev,0,0,0])

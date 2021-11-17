@@ -94,7 +94,7 @@ def plot_raw_rvs(file, show=False, save=False):
     """
     Load RVs from a data file, and plot time vs. RV with associated error bars.
     """
-    time, rv, rv_err = load_rvs(file)
+    time, rv, rv_error = load_rvs(file)
 
     #plot the RVs vs time
     plt.errorbar(time,rv,yerr=rv_error,fmt='.',c='black',linewidth=1)
